@@ -20,7 +20,6 @@ class AddUserIdToTasksTable extends Migration
             $table->foreign('user_id')->references('id')->on('users');
         });
     }
-
     /**
      * Reverse the migrations.
      *
@@ -30,7 +29,6 @@ class AddUserIdToTasksTable extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             $table->dropForeign('tasks_user_id_foreign');
-            
             $table->dropColumn('user_id');
         });
     }

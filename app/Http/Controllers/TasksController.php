@@ -14,16 +14,23 @@ class TasksController extends Controller
      * @return \Illuminate\Http\Response
      */
     // getでtasks/にアクセスされた場合の「一覧表示処理」
+    
     public function index()
     {
-        // タスク一覧を取得
-        $tasks = Task::all();
+        if (\Auth::check()) { // 認証済みの場合
+           // タスク一覧を取得
+            $tasks = Task::all();
 
-        // タスク一覧ビューでそれを表示
-        return view('tasks.index', [
-            'tasks' => $tasks,
+            // タスク一覧ビューでそれを表示
+            return view('tasks.index', [
+                'tasks' => $tasks,
         ]);
-    }
+        
+        } else {
+            return view('welcome');
+        }
+    } 
+
 
     /**
      * Show the form for creating a new resource.
@@ -50,13 +57,14 @@ class TasksController extends Controller
     {
         // バリデーション
         $request->validate([
-            'status' => 'required|max:10',   // 追加
+            'status' => 'required|max:10',
             'content' => 'required|max:255',
         ]);
         
         // タスクを作成
         $task = new Task;
-        $task->status = $request->status;    // 追加
+        $task->user_id = \Auth::user()->id;
+        $task->status = $request->status;
         $task->content = $request->content;
         $task->save();
 
@@ -140,4 +148,5 @@ class TasksController extends Controller
         // トップページへリダイレクトさせる
         return redirect('/');
     }
+
 }
