@@ -17,21 +17,26 @@ class TasksController extends Controller
     
     public function index()
     {
+        $data = [];
         if (\Auth::check()) { // 認証済みの場合
-           // タスク一覧を取得
-            $tasks = Task::all();
-
-            // タスク一覧ビューでそれを表示
-            return view('tasks.index', [
-                'tasks' => $tasks,
-        ]);
+            // 認証済みユーザを取得
+            $user = \Auth::user();
+            
+            $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
         
-        } else {
-            return view('welcome');
+            $data = [
+                'tasks' => $tasks,
+            ];
+            
+            return view('tasks.index', $data);
         }
-    } 
+        
+        else{
+        return view('welcome');
+        }
+    }
 
-
+    
     /**
      * Show the form for creating a new resource.
      *
@@ -61,6 +66,7 @@ class TasksController extends Controller
             'content' => 'required|max:255',
         ]);
         
+        
         // タスクを作成
         $task = new Task;
         $task->user_id = \Auth::user()->id;
@@ -82,6 +88,12 @@ class TasksController extends Controller
     {
         // idの値でタスクを検索して取得
         $task = Task::findOrFail($id);
+
+        // 関係するモデルの件数をロード
+        $user->loadRelationshipCounts();
+
+        // ユーザの投稿一覧を作成日時の降順で取得
+        $microposts = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
 
         // タスク詳細ビューでそれを表示
         return view('tasks.show', [
@@ -142,8 +154,11 @@ class TasksController extends Controller
     {
         // idの値でタスクを検索して取得
         $task = Task::findOrFail($id);
-        // タスクを削除
-        $task->delete();
+        
+        // 認証済みユーザ（閲覧者）がその投稿の所有者である場合は、投稿を削除
+        if (\Auth::id() === $task->user_id) {
+            $task->delete();
+        }
 
         // トップページへリダイレクトさせる
         return redirect('/');
