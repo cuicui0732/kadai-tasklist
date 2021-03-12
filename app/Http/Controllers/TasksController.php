@@ -90,10 +90,10 @@ class TasksController extends Controller
         $task = Task::findOrFail($id);
 
         // 関係するモデルの件数をロード
-        $user->loadRelationshipCounts();
+        //$tasks->loadRelationshipCounts();
 
         // ユーザの投稿一覧を作成日時の降順で取得
-        $microposts = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
+        //$tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
 
         // タスク詳細ビューでそれを表示
         return view('tasks.show', [
