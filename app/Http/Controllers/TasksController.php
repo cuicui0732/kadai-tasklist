@@ -66,7 +66,6 @@ class TasksController extends Controller
             'content' => 'required|max:255',
         ]);
         
-        
         // タスクを作成
         $task = new Task;
         $task->user_id = \Auth::user()->id;
@@ -88,17 +87,18 @@ class TasksController extends Controller
     {
         // idの値でタスクを検索して取得
         $task = Task::findOrFail($id);
-
-        // 関係するモデルの件数をロード
-        //$tasks->loadRelationshipCounts();
-
-        // ユーザの投稿一覧を作成日時の降順で取得
-        //$tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
-
-        // タスク詳細ビューでそれを表示
-        return view('tasks.show', [
+        
+        $data = [
             'task' => $task,
-        ]);
+        ];
+        
+        // 認証済みユーザ（閲覧者）がその投稿の所有者である場合はタスク編集ビューでそれを表示
+        if (\Auth::id() === $task->user_id) {
+            return view('tasks.show', $data);;
+        }
+        else{
+        return view('welcome');
+        }
     }
 
     /**
@@ -111,11 +111,18 @@ class TasksController extends Controller
     {
         // idの値でタスクを検索して取得
         $task = Task::findOrFail($id);
-
-        // タスク編集ビューでそれを表示
-        return view('tasks.edit', [
+        
+        $data = [
             'task' => $task,
-        ]);
+        ];
+        
+        // 認証済みユーザ（閲覧者）がその投稿の所有者である場合はタスク編集ビューでそれを表示
+        if (\Auth::id() === $task->user_id) {
+            return view('tasks.edit', $data);;
+        }
+        else{
+        return view('welcome');
+        }
     }
 
     /**
@@ -135,11 +142,14 @@ class TasksController extends Controller
 
         // idの値でタスクを検索して取得
         $task = Task::findOrFail($id);
-        // タスクを更新
-        $task->status = $request->status;    // 追加
-        $task->content = $request->content;
-        $task->save();
-
+        
+        // 認証済みユーザ（閲覧者）がその投稿の所有者である場合は、タスクを更新
+        if (\Auth::id() === $task->user_id) {
+            $task->status = $request->status;    
+            $task->content = $request->content;
+            $task->save();
+        }
+        
         // トップページへリダイレクトさせる
         return redirect('/');
     }

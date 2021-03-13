@@ -48,9 +48,9 @@ class User extends Authenticatable
     /**
      * このユーザに関係するモデルの件数をロードする。
      */
-    public function loadRelationshipCounts()
-    {
-        $this->loadCount('tasks');
-    }
+    //public function loadRelationshipCounts()
+    //{
+    //    $this->loadCount('tasks');
+    //}
     
 }
